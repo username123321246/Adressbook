@@ -20,16 +20,29 @@ def update():
     else:
         if key not in addressbook.keys():
             listbox.insert(END, key)
-        addressbook[key] = (address_entry.get(), mobile_entry.get(), email_entry())
+        addressbook[key] = (address_entry.get(), mobile_entry.get(), email_entry.get())
         clear_all()
             
 
 def saveFile():
         fout = asksaveasfile(defaultextension = ".txt")
         if fout is not None:
-            for item in list.get(0, END):
-                print(item.strip(), file = fout)
-                list.delete(0,END)
+            print(addressbook, file = fout)
+        else:
+            messagebox.showinfo("Error", "Couldn't save file")
+
+
+def openFile():
+    global addressbook
+    clear_all()
+    fin = askopenfile(title = "Open File")
+# If filename selected
+    if fin:
+        addressbook = eval(fin.read())
+        for key in addressbook.keys():
+            listbox.insert(END, key)
+    else:
+        messagebox.showinfo("Error", "Can't open file")
 
 def edit():
      clear_all()
@@ -40,7 +53,7 @@ def edit():
      #get details corresponding to anem from dictioary
         address_entry.insert(0, details[0])
         mobile_entry.insert(0, details[1])
-        email_entry.insert(0, details, [2])
+        email_entry.insert(0, details[2])
      else:
         messagebox.showinfo("Error", "Information is missing.")
 def delete():
@@ -52,6 +65,24 @@ def delete():
     else:
         messagebox.showinfo("Error", "Select a name.")
 
+def display(event):
+    newWindow = Toplevel(mainwin)
+    index = listbox.curselection()
+
+    contact =""
+    if index:
+        key = listbox.get(index)
+        contact = "Name   :" + key + "\n"
+
+        details = addressbook[key]
+        contact += "Address   :" + details[0] + "\n"
+        contact += "Mobile    :" + details[1] + "\n"
+        contact += "Email     :" + details[2] + "\n"
+
+    window = Label(newWindow)
+    window.grid(row = 0, column = 0)
+    window.configure(text = contact)
+    
 
 
 
@@ -62,11 +93,12 @@ mainwin.title("My Adress Book")
 maintitle = Label(mainwin, text = "My Adress Book")
 maintitle.grid(row = 0, column = 0, columnspan = 3, pady = 4)
 
-open_button = Button(mainwin, text = "Open", command = None)
+open_button = Button(mainwin, text = "Open", command = openFile)
 open_button.grid(row = 0, column = 3, pady = 4)
 
 listbox = Listbox(mainwin)
 listbox.grid(row = 1, rowspan = 5, column = 0, columnspan = 3)
+listbox.bind('<<ListboxSelect>>', display)
 
 name_label = Label(mainwin, text = "Name")
 name_label.grid(row = 1, column = 3, padx = 3)
